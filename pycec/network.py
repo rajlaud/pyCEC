@@ -242,7 +242,12 @@ class HDMIDevice:
         _LOGGER.debug("Starting device %d", self.logical_address)
         while not self._stop:
             for prop in UPDATEABLE:
-                if not self._stop:
+                if not self._stop and (
+                    prop != CMD_PHYSICAL_ADDRESS or self._physical_address is None
+                ):
+                    # Skip update of physical address unless unset to prevent
+                    # unwanted activity on Panasonic television display.
+                    _LOGGER.debug("Updating property: %s", UPDATEABLE[prop])
                     await self.async_request_update(prop[0])
             start_time = self._loop.time()
             while not self._stop and self._loop.time() <= (
